@@ -4,7 +4,15 @@ const { getCities } = require('../data/store');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  const cities = getCities();
+  let cities = getCities();
+
+  const { search } = req.query;
+  if (search) {
+    cities = cities.filter(city =>
+      city.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }
+
   res.json(cities);
 });
 
