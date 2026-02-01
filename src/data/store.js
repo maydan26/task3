@@ -36,6 +36,29 @@ const restaurants = [
   { id: 22, name: 'The Winding Stair', cityId: 'dublin' },
 ];
 
+const coffeeShops = [
+  { id: 1, name: 'Monmouth Coffee', cityId: 'london' },
+  { id: 2, name: 'Prufrock Coffee', cityId: 'london' },
+  { id: 3, name: 'Café de Flore', cityId: 'paris' },
+  { id: 4, name: 'Coutume Café', cityId: 'paris' },
+  { id: 5, name: 'The Barn', cityId: 'berlin' },
+  { id: 6, name: 'Father Carpenter', cityId: 'berlin' },
+  { id: 7, name: 'Sant\'Eustachio Il Caffè', cityId: 'rome' },
+  { id: 8, name: 'Tazza d\'Oro', cityId: 'rome' },
+  { id: 9, name: 'Café Commercial', cityId: 'madrid' },
+  { id: 10, name: 'Toma Café', cityId: 'madrid' },
+  { id: 11, name: 'Lot Sixty One', cityId: 'amsterdam' },
+  { id: 12, name: 'Screaming Beans', cityId: 'amsterdam' },
+  { id: 13, name: 'Satan\'s Coffee Corner', cityId: 'barcelona' },
+  { id: 14, name: 'Nomad Coffee', cityId: 'barcelona' },
+  { id: 15, name: 'Café Central', cityId: 'vienna' },
+  { id: 16, name: 'Café Sperl', cityId: 'vienna' },
+  { id: 17, name: 'Fabrica Coffee Roasters', cityId: 'lisbon' },
+  { id: 18, name: 'Copenhagen Coffee Lab', cityId: 'lisbon' },
+  { id: 19, name: '3fe Coffee', cityId: 'dublin' },
+  { id: 20, name: 'Clement & Pekoe', cityId: 'dublin' },
+];
+
 const bars = [
   { id: 1, name: 'The Savoy American Bar', cityId: 'london' },
   { id: 2, name: 'Connaught Bar', cityId: 'london' },
@@ -75,9 +98,14 @@ function getBarsByCityId(cityId) {
   return bars.filter((b) => b.cityId === cityId);
 }
 
+function getCoffeeShopsByCityId(cityId) {
+  return coffeeShops.filter((c) => c.cityId === cityId);
+}
+
 module.exports = {
   getCities,
   getCityById,
   getRestaurantsByCityId,
   getBarsByCityId,
+  getCoffeeShopsByCityId,
 };
