@@ -8,36 +8,29 @@ interface City {
 }
 
 function App() {
-  const [cities, setCities] = useState<City[] | []>([]);
+  // const [cities, setCities] = useState<City[] | []>([]);
   const [cityRestaurants, setCityRestaurants] = useState([]);
   const [cityBars, setCityBars] = useState([]);
+  const [cityCoffeeShops, setCityCoffeeShops] = useState([]);
   const [searchInput, setSearchInput] = useState("");
+  const [isLoading, setIsLoading] = useState("");
 
   const debounceValue = useDebounceValue(searchInput, 2000);
 
-  const filtered = useMemo(() => {
-    console.log(cities);
-    return cities.filter((city) =>
-      city.name.toLocaleLowerCase().includes(debounceValue.toLocaleLowerCase())
-    );
-  }, [debounceValue, cities]);
+  // const filtered = useMemo(() => {
+  //   console.log(cities);
+  //   return cities.filter((city) =>
+  //     city.name.toLocaleLowerCase().includes(debounceValue.toLocaleLowerCase())
+  //   );
+  // }, [debounceValue, cities]);
 
-  const fetchCityRestaurants = async (str, signal) => {
+  const fetchCityPlacesByType = async (str, signal, type, setter) => {
     const response = await fetch(
-      `http://localhost:3000/api/cities/${str.toLocaleLowerCase()}/restaurants`,
+      `http://localhost:3000/api/cities/${str.toLocaleLowerCase()}/${type}`,
       { signal }
     );
-    const newCityRestaurants = await response.json();
-    setCityRestaurants(newCityRestaurants);
-  };
-
-  const fetchCityBars = async (str, signal) => {
-    const response = await fetch(
-      `http://localhost:3000/api/cities/${str.toLocaleLowerCase()}/bars`,
-      { signal }
-    );
-    const newCityBars = await response.json();
-    setCityBars(newCityBars);
+    const cityPlaces = await response.json();
+    setter(cityPlaces);
   };
 
   // useEffect(() => {
@@ -49,16 +42,59 @@ function App() {
   //   fetchData();
   // }, []);
 
+  //only for coffee shops fetch - different logic
   useEffect(() => {
-    if (searchInput.length === 0) {
+    if (debounceValue.length === 0) {
+      setCityCoffeeShops([]);
       return;
     }
     const controller = new AbortController();
     const signal = controller.signal;
-    Promise.all([
-      fetchCityRestaurants(debounceValue, signal),
-      fetchCityBars(debounceValue, signal),
-    ]);
+
+    const timerId = setTimeout(() => {
+      setIsLoading(true);
+    }, 2000);
+
+    const fetchCoffeeShops = async () => {
+      try {
+        const coffeeShops = await fetchCityPlacesByType(
+          debounceValue,
+          signal,
+          "coffee-shops",
+          setCityCoffeeShops
+        );
+        console.log({ coffeeShops });
+      } catch (err) {
+        console.log(err);
+      } finally {
+        clearTimeout(timerId);
+        setIsLoading(false);
+      }
+    };
+
+    fetchCoffeeShops();
+
+    return () => {
+      clearTimeout(timerId);
+      controller.abort();
+    };
+  }, [debounceValue]);
+
+  useEffect(() => {
+    if (debounceValue.length === 0) {
+      setCityRestaurants([]);
+      setCityBars([]);
+      return;
+    }
+    const controller = new AbortController();
+    const signal = controller.signal;
+    fetchCityPlacesByType(
+      debounceValue,
+      signal,
+      "restaurants",
+      setCityRestaurants
+    ),
+      fetchCityPlacesByType(debounceValue, signal, "bars", setCityBars);
 
     return () => controller.abort();
   }, [debounceValue]);
@@ -71,18 +107,40 @@ function App() {
         value={searchInput}
         onChange={(e) => setSearchInput(e.target.value)}
       />
-      <div>Restaurants:</div>
-      <ul>
-        {cityRestaurants.length > 0 &&
-          cityRestaurants.map((restaurant) => (
-            <li key={restaurant.id}>{restaurant.name}</li>
-          ))}
-      </ul>
-      <div>Bars:</div>
-      <ul>
-        {cityBars.length > 0 &&
-          cityBars.map((bar) => <li key={bar.id}>{bar.name}</li>)}
-      </ul>
+      {cityRestaurants.length > 0 && (
+        <div>
+          <h3>Restaurants:</h3>
+          <ul>
+            {cityRestaurants.map((restaurant) => (
+              <li key={restaurant.id}>{restaurant.name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {cityBars.length > 0 && (
+        <div>
+          <h3>Bars:</h3>
+          <ul>
+            {cityBars.map((bar) => (
+              <li key={bar.id}>{bar.name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {cityCoffeeShops.length > 0 ? (
+        <div>
+          <h3>Coffee shops:</h3>
+          <ul>
+            {cityCoffeeShops.map((coffeeShop) => (
+              <li key={coffeeShop.id}>{coffeeShop.name}</li>
+            ))}
+          </ul>
+        </div>
+      ) : isLoading ? (
+        <div>Loading...</div>
+      ) : (
+        ""
+      )}
     </>
   );
 }
